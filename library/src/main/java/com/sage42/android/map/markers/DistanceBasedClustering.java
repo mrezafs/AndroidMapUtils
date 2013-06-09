@@ -1,9 +1,9 @@
 package com.sage42.android.map.markers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.sage42.android.map.DistanceUtils;
@@ -30,22 +30,22 @@ import com.sage42.android.map.DistanceUtils;
  */
 public class DistanceBasedClustering<T extends IMapLocation>
 {
-    public Map<LatLng, List<T>> reduce(final List<T> markers, final double minDistanceBetweenClusters)
+    public void reduce(final List<T> markers, final double minDistanceBetweenClusters,
+            final Map<String, LatLng> clusterLocations, final Map<String, List<T>> clusterMap)
     {
-        final Map<LatLng, List<T>> output = new HashMap<LatLng, List<T>>();
-
         for (final T thisMarker : markers)
         {
             // check existing clusters for a center point that is within the min distance
-            LatLng found = null;
-            for (final LatLng centerpoint : output.keySet())
+            Entry<String, LatLng> found = null;
+            for (final Entry<String, LatLng> entry : clusterLocations.entrySet())
             {
                 // calc distance from current marker to this point
-                final double distance = DistanceUtils.distanceInMetersFromLatLngs(centerpoint, thisMarker.getLatLng());
+                final double distance = DistanceUtils.distanceInMetersFromLatLngs(entry.getValue(),
+                        thisMarker.getLatLng());
                 if (distance <= minDistanceBetweenClusters)
                 {
                     // cluster found add to cluster
-                    found = centerpoint;
+                    found = entry;
                     break;
                 }
             }
@@ -53,17 +53,17 @@ public class DistanceBasedClustering<T extends IMapLocation>
             if (found == null)
             {
                 // start new cluster
-                output.put(thisMarker.getLatLng(), new ArrayList<T>());
-                output.get(thisMarker.getLatLng()).add(thisMarker);
+                final String id = thisMarker.getId();
+                clusterLocations.put(id, thisMarker.getLatLng());
+
+                clusterMap.put(id, new ArrayList<T>());
+                clusterMap.get(id).add(thisMarker);
             }
             else
             {
                 // cluster found add to cluster
-                output.get(found).add(thisMarker);
+                clusterMap.get(found.getKey()).add(thisMarker);
             }
-
         }
-
-        return output;
     }
 }
