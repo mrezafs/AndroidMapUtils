@@ -12,6 +12,12 @@ repositories
     mavenCentral()
 }
 
+// general dependencies
+dependencies
+{
+    compile 'com.google.android.gms:play-services:3.2.+'
+}
+
 android
 {
     compileSdkVersion rootProject.compileSdkVersion
