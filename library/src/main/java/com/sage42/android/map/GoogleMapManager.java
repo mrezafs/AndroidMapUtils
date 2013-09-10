@@ -3,6 +3,7 @@ package com.sage42.android.map;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -18,29 +19,39 @@ import com.google.android.gms.maps.model.LatLng;
 public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServicesClient.ConnectionCallbacks,
                 GooglePlayServicesClient.OnConnectionFailedListener
 {
-    public static final int   ANIMATION_DURATION = 2500;
+    private static final String TAG          = GoogleMapManager.class.getSimpleName();
 
     // default map settings
-    public static final float STARTING_ZOOM      = 11f;
-    public static final float DEFAULT_ZOOM       = 14f;
-    public final int          mMapType           = GoogleMap.MAP_TYPE_NORMAL;
+    public static final float   DEFAULT_ZOOM = 14f;
 
     // the map instance
-    private GoogleMap         mMap;
+    private GoogleMap           mMap;
 
     // Location API
-    LocationClient            mLocationClient;
+    LocationClient              mLocationClient;
 
     public void init(final SupportMapFragment mapFragment)
     {
         if (this.mMap != null)
         {
             // map already init
+            if (BuildConfig.DEBUG)
+            {
+                Log.w(TAG, "Attempt to init map failed - already initiated"); //$NON-NLS-1$
+            }
             return;
         }
 
         // get map instance from supplied fragment
         this.mMap = mapFragment.getMap();
+        if (this.mMap == null)
+        {
+            if (BuildConfig.DEBUG)
+            {
+                Log.w(TAG, "Attempt to init map failed - no map found in supplied fragment"); //$NON-NLS-1$
+            }
+            return;
+        }
 
         // Check if we were successful in obtaining the map.
         this.mMap.setMyLocationEnabled(false);
@@ -77,8 +88,11 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
     public void onAttach(final Activity activity)
     {
         // Initialize the locaiton client
-        this.mLocationClient = new LocationClient(activity, this, this);
-        this.mLocationClient.connect();
+        if (this.mLocationClient == null)
+        {
+            this.mLocationClient = new LocationClient(activity, this, this);
+            this.mLocationClient.connect();
+        }
     }
 
     /**
@@ -86,11 +100,11 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
      */
     public void onDetach()
     {
-
         if (this.mLocationClient != null)
         {
             this.mLocationClient.disconnect();
         }
+        this.mLocationClient = null;
     }
 
     public GoogleMap getMap()
@@ -108,29 +122,67 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
             final Location location = this.mLocationClient.getLastLocation();
             if (location != null && this.mMap != null)
             {
-                this.mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location
-                                .getLongitude())));
+                this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
             }
         }
+    }
+
+    public void zoomIn()
+    {
+        if (this.mMap == null)
+        {
+            if (BuildConfig.DEBUG)
+            {
+                Log.w(TAG, "Zoom In failed, no map"); //$NON-NLS-1$
+            }
+            return;
+        }
+
+        this.mMap.animateCamera(CameraUpdateFactory.zoomBy(1f));
+    }
+
+    public void zoomOut()
+    {
+        if (this.mMap == null)
+        {
+            if (BuildConfig.DEBUG)
+            {
+                Log.w(TAG, "Zoom Out failed, no map"); //$NON-NLS-1$
+            }
+            return;
+        }
+
+        this.mMap.animateCamera(CameraUpdateFactory.zoomBy(-1f));
     }
 
     @Override
     public void onConnectionFailed(final ConnectionResult result)
     {
-        // Do nothing
         // TODO: put GPS warning banner here?
+        if (BuildConfig.DEBUG)
+        {
+            Log.w(TAG, "Connection to LocationClient has failed with: " + result.getErrorCode()); //$NON-NLS-1$
+        }
     }
 
     @Override
     public void onConnected(final Bundle connectionHint)
     {
-        // Do nothing
+        if (BuildConfig.DEBUG)
+        {
+            Log.i(TAG, "Connection to LocationClient has successful."); //$NON-NLS-1$
+        }
+        this.showMyLocation();
     }
 
     @Override
     public void onDisconnected()
     {
-        // Do nothing
+        if (BuildConfig.DEBUG)
+        {
+            Log.w(TAG, "Connection to LocationClient has disconneced."); //$NON-NLS-1$
+        }
     }
 
 }
