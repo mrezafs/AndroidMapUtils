@@ -53,17 +53,20 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
             return;
         }
 
-        // Check if we were successful in obtaining the map.
-        this.mMap.setMyLocationEnabled(false);
         this.mapSettings();
 
         // listen and redraw pins
         this.mMap.setOnCameraChangeListener(this);
     }
 
+    /**
+     * These will need refactoring into some kind of callback or just plain removed
+     */
     private void mapSettings()
     {
         // The Map is verified. It is now safe to manipulate the map.
+        this.mMap.setMyLocationEnabled(true);
+
         final UiSettings settings = this.mMap.getUiSettings();
         settings.setCompassEnabled(false);
         settings.setMyLocationButtonEnabled(false); // We code in our own button
