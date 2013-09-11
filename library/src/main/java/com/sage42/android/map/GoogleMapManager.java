@@ -19,16 +19,25 @@ import com.google.android.gms.maps.model.LatLng;
 public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServicesClient.ConnectionCallbacks,
                 GooglePlayServicesClient.OnConnectionFailedListener
 {
-    private static final String TAG          = GoogleMapManager.class.getSimpleName();
+    private static final String              TAG          = GoogleMapManager.class.getSimpleName();
 
     // default map settings
-    public static final float   DEFAULT_ZOOM = 14f;
+    public static final float                DEFAULT_ZOOM = 14f;
 
     // the map instance
-    private GoogleMap           mMap;
+    private GoogleMap                        mMap;
 
     // Location API
-    LocationClient              mLocationClient;
+    LocationClient                           mLocationClient;
+
+    // callback/notify container
+    private final IGoogleMapManagerCallbacks mCallback;
+
+    public GoogleMapManager(final IGoogleMapManagerCallbacks callback)
+    {
+        super();
+        this.mCallback = callback;
+    }
 
     public void init(final SupportMapFragment mapFragment)
     {
@@ -131,6 +140,16 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
         }
     }
 
+    public LatLng getLastLocation()
+    {
+        if (this.mLocationClient == null || !this.mLocationClient.isConnected())
+        {
+            return null;
+        }
+        final Location location = this.mLocationClient.getLastLocation();
+        return new LatLng(location.getLatitude(), location.getLongitude());
+    }
+
     public void zoomIn()
     {
         if (this.mMap == null)
@@ -176,7 +195,11 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
         {
             Log.i(TAG, "Connection to LocationClient has successful."); //$NON-NLS-1$
         }
-        this.showMyLocation();
+        // inform that the map is fully ready and connected to location services
+        if (this.mCallback != null)
+        {
+            this.mCallback.onMapReady();
+        }
     }
 
     @Override
@@ -186,6 +209,14 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
         {
             Log.w(TAG, "Connection to LocationClient has disconneced."); //$NON-NLS-1$
         }
+    }
+
+    /**
+     * Callbacks/Events into containing activity/fragment
+     */
+    public interface IGoogleMapManagerCallbacks
+    {
+        void onMapReady();
     }
 
 }
