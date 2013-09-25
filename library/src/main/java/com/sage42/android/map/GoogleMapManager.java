@@ -147,6 +147,10 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
             return null;
         }
         final Location location = this.mLocationClient.getLastLocation();
+        if (location == null)
+        {
+            return null;
+        }
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
