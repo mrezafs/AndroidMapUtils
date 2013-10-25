@@ -6,12 +6,6 @@ apply plugin: 'android-library'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-repositories
-{
-    mavenLocal()
-    mavenCentral()
-}
-
 // general dependencies
 dependencies
 {
