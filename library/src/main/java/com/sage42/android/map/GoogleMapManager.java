@@ -134,9 +134,20 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
             final Location location = this.mLocationClient.getLastLocation();
             if (location != null && this.mMap != null)
             {
-                this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                                new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
+                this.showLocation(location);
             }
+        }
+    }
+
+    /**
+     * Center the map fragment on location
+     */
+    public void showLocation(final Location location)
+    {
+        if (location != null && this.mMap != null)
+        {
+            this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
         }
     }
 
