@@ -28,7 +28,7 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
     private GoogleMap                        mMap;
 
     // Location API
-    LocationClient                           mLocationClient;
+    protected LocationClient                 mLocationClient;
 
     // callback/notify container
     private final IGoogleMapManagerCallbacks mCallback;
@@ -129,10 +129,10 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
      */
     public void showMyLocation()
     {
-        if (this.mLocationClient != null && this.mLocationClient.isConnected())
+        if ((this.mLocationClient != null) && this.mLocationClient.isConnected())
         {
             final Location location = this.mLocationClient.getLastLocation();
-            if (location != null && this.mMap != null)
+            if ((location != null) && (this.mMap != null))
             {
                 this.showLocation(location);
             }
@@ -144,7 +144,7 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
      */
     public void showLocation(final Location location)
     {
-        if (location != null && this.mMap != null)
+        if ((location != null) && (this.mMap != null))
         {
             this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
@@ -153,7 +153,7 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
 
     public LatLng getLastLocation()
     {
-        if (this.mLocationClient == null || !this.mLocationClient.isConnected())
+        if ((this.mLocationClient == null) || !this.mLocationClient.isConnected())
         {
             return null;
         }
@@ -232,6 +232,14 @@ public class GoogleMapManager implements OnCameraChangeListener, GooglePlayServi
     public interface IGoogleMapManagerCallbacks
     {
         void onMapReady();
+    }
+
+    /**
+     * @return the locationClient
+     */
+    public LocationClient getLocationClient()
+    {
+        return this.mLocationClient;
     }
 
 }
